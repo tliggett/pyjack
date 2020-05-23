@@ -1,6 +1,6 @@
 import json
 
-from pyjack.shoe import Shoe, Card, Rank, Suit
+from shoe import Shoe, Card, Rank, Suit
 
 
 

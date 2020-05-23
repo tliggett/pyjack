@@ -1,7 +1,7 @@
 import pandas as pd
 
-from lib.pyjack.shoe import Shoe, Card, Rank, Suit
-from lib.pyjack.player import Player
+from shoe import Shoe, Card, Rank, Suit
+from player import Player
 
 class BlackJackTable:
     def __init__(self, hands=1, decks=6, player_count=4):
