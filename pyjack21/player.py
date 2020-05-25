@@ -15,7 +15,7 @@ class Player:
         self.type = 'human' # player type. will allow for ai types later
         self.payroll = payroll # player's remaining money 
         self.wager = 0  # player's wager for current hand
-        with open('pyjack21/human.json') as f:
+        with open('pyjack21/data/human.json') as f:
             self.moves = json.load(f)
 
     def hand_value(self, hand=None):
