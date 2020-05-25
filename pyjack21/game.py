@@ -1,41 +1,47 @@
 import pandas as pd
 
-from shoe import Shoe, Card, Rank, Suit
-from player import Player
+from pyjack21.shoe import Shoe, Card, Rank, Suit
+from pyjack21.player import Player
 
 class BlackJackTable:
-    def __init__(self, hands=1, decks=6, player_count=4):
+    def __init__(self, hands=1, decks=6, player_count=4,
+                 payroll=None):
         self.hands_to_play = hands
         self.hands_played = 0
         self.players = []
+        if payroll == None:
+            payroll = []
+            for i in range(player_count):
+                payroll.append(500)
+
         for i in range(player_count):
-            self.players.append(Player())
+            self.players.append(Player(payroll=payroll[i]))
         self.dealer = Player()
         self.deck_count = decks
         self.shoe = Shoe(self.deck_count)
         self.shoe.shuffle()
-        self.shoe_threshold = len(self.players) * 6  
+        self.shoe_threshold = len(self.players) * 6
         self.df = self.__initialize_data()
-    
+
     def run(self):
         while self.hands_played < self.hands_to_play:
             self.play_hand()
             # self.output_table_status()
 
     def play_hand(self):
-        
+
         self.wager()
         self.deal()
         hand = self.hands_played + 1
 
-        dealer_card = self.dealer.hand[0] 
+        dealer_card = self.dealer.hand[0]
 
         # data collection
         # --------------------------------------
         self.df.loc[hand, 'dealer_card'] = dealer_card.char_rep()
         self.df.loc[hand, 'dealer_hand'] = self.dealer.hand_value()
         for i in range(len(self.players)):
-            self.df.loc[hand, f'hand_{i}'] = self.players[i].hand_str()
+            self.df.loc[hand, f'hand_{i}'] = self.players[i].hand_key()
         # --------------------------------------
 
         # handle dealer blackjack
@@ -43,12 +49,12 @@ class BlackJackTable:
             # print(f'DEALER BLACKJACK!!!')
             for player in self.players:
                 player.pay(0)
-        
+
         else:
             # have each player play
             for i in range(len(self.players)):
                 player = self.players[i]
-                
+
                 # check if player is playing
                 if player.wager == 0:
                     continue
@@ -59,7 +65,7 @@ class BlackJackTable:
                 # first check for blackjack
                 if player.play(self.shoe, dealer_card) == "BLACKJACK":
                     player.pay(player.wager * 2.5)
-                
+
                 # then play hand
                 while player.play(self.shoe, dealer_card) not in ["BUST", "S", "P", "BLACKJACK"]:
                     if player.play(self.shoe, dealer_card) == "H":
@@ -74,12 +80,12 @@ class BlackJackTable:
                 if player.hand_value() > 21:
                     player.wager = 0
 
-            
+
             while self.dealer.hand_value() < 17:
                 self.dealer.hand.append(self.shoe.deal())
-            
+
             # print(f'DEALER: {self.dealer.hand_value()}')
-            
+
             # data collection
             self.df.loc[hand, 'dealer_final_hand'] = self.dealer.hand_value()
 
@@ -94,20 +100,30 @@ class BlackJackTable:
                         player.pay(player.wager)
                     else:
                         player.pay(0)
-        
+
         for i in range(len(self.players)):
             self.df.loc[hand, f'payroll_{i}'] = self.players[i].payroll
+            hand_earnings = self.df.loc[hand, f'payroll_{i}'] - self.df.loc[hand-1, f'payroll_{i}']
+            self.df.loc[hand, f'hand_earnings_{i}'] = hand_earnings
+            hand_result = ""
+            if hand_earnings > 0:
+                hand_result = "W"
+            elif hand_earnings < 0:
+                hand_result = "L"
+            else:
+                hand_result = "P"
+
+            self.df.loc[hand, f'hand_result_{i}'] = hand_result
 
         self.clear_table()
         self.hands_played = self.hands_played + 1
-        
 
 
     def wager(self):
         for player in self.players:
             player.bet()
 
-    def deal(self):    
+    def deal(self):
         self.shoe.burn()
         self.dealer.hand.append(self.shoe.deal())
         for player in self.players:
@@ -144,9 +160,13 @@ class BlackJackTable:
             df.loc[0, f'init_move_{i}'] = 'NaN' 
         return df
 
+    def to_csv(self, csv):
+        table.df.to_csv(csv)
+
 
 if __name__ == "__main__":
     table = BlackJackTable(hands=1000)
     table.run()
-    # print(table.df)
+    print(table.df)
+    table.to_csv('output.csv')
 

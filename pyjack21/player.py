@@ -1,6 +1,6 @@
 import json
 
-from shoe import Shoe, Card, Rank, Suit
+from pyjack21.shoe import Shoe, Card, Rank, Suit
 
 
 
@@ -10,13 +10,13 @@ class Player:
         initializes a player for blackjack
         :param payroll: blackjack player payroll
         """
-        
+
         self.hand = [] # The player's hand of cards.
         self.type = 'human' # player type. will allow for ai types later
         self.payroll = payroll # player's remaining money 
         self.wager = 0  # player's wager for current hand
-        with open('lib/pyjack/human.json') as f:   
-            self.moves = json.load(f)       
+        with open('pyjack21/human.json') as f:
+            self.moves = json.load(f)
 
     def hand_value(self, hand=None):
         """
@@ -36,7 +36,7 @@ class Player:
                 if card.value() == 11:
                     first_ace = False
             else:
-               value += card.value(aces_high=False) 
+               value += card.value(aces_high=False)
         # if the soft value busts, convert to hard value
         if value > 21:
             value = 0
@@ -56,7 +56,7 @@ class Player:
         else:
             self.payroll = self.payroll - minimum
             self.wager = minimum
-        return minimum 
+        return minimum
 
     def play(self, shoe: Shoe, dealer_card: Card):
         """
@@ -73,7 +73,7 @@ class Player:
             else:
                 move = "S"
         else:
-             move = self.moves["hand"][self.hand_str()][dealer_card.char_rep()]
+             move = self.moves["hand"][self.hand_key()][dealer_card.char_rep()]
         # print(f'{self.hand_value()} : {move}')
         return move
 
@@ -106,6 +106,19 @@ class Player:
                 handstr = f'H{self.hand_value()}'
         return handstr
 
+    def hand_key(self):
+        hand_s = sorted(self.hand)
+        hand_key = ""
+        for card in hand_s:
+            hand_key += card.char_rep()
+            if self.__hand_is_pair():
+                hand_key = f'{hand_key}'
+            elif 'A' in hand_key and self.__hand_is_soft():
+                hand_key = f'S{self.hand_value()}'
+            else:
+                hand_key=f'H{self.hand_value()}'
+        return hand_key
+
     def __hand_is_soft(self):
         """
         determines whether a hand is soft
@@ -115,7 +128,13 @@ class Player:
         # print(self.hand)
         if hard_value <= 11:
             return True
-        return False 
+        return False
+
+    def __hand_is_pair(self):
+        if len(self.hand) > 2:
+            return False
+        if self.hand[0] == self.hand[1]:
+            return True
 
     def __pull_aces(self, hand=None):
         """
@@ -150,13 +169,15 @@ if __name__ == "__main__":
     shoe.shuffle()
     shoe.burn()
     dealer_card = shoe.deal()
-    # print(f'Dealer card: {dealer_card}')
+    print(f'Dealer card: {dealer_card.char_rep()}')
     izzy.hand.append(shoe.deal())
     izzy.hand.append(shoe.deal())
-    # print(f'{izzy.hand_str()}')
+    print(f'{izzy.hand_str()}')
+    print(f'{izzy.hand_key()}')
+    print(f'{izzy.play(shoe, dealer_card)}')
     while izzy.play(shoe, dealer_card) == "H":
        izzy.hand.append(shoe.deal())
-       # print(f'{izzy.hand_str()}')
+       print(f'{izzy.hand_str()}')
 
-    # print(f'Final Hand Value: {izzy.hand_value()}')
+    print(f'Final Hand Value: {izzy.hand_value()}')
     
