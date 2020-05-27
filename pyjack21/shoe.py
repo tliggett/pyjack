@@ -60,7 +60,7 @@ class Card:
         elif self.rank == Rank.queen:
             return "Q"
         elif self.rank == Rank.king:
-            return "K"    
+            return "K"
         else:
             return "?"
 
@@ -119,7 +119,7 @@ class Card:
         elif self.rank == Rank.queen:
             return 12
         elif self.rank == Rank.king:
-            return 13    
+            return 13
         else:
             return 99
 
@@ -131,19 +131,19 @@ class Card:
 
     def __le__(self, other):
         return self.__cmp_value() <= other.__cmp_value()
-    
+
     def __eq__(self, other):
         return self.__cmp_value() == other.__cmp_value()
-    
+
     def __ne__(self, other):
         return self.__cmp_value() != other.__cmp_value()
-    
+
     def __ge__(self, other):
         return self.__cmp_value() >= other.__cmp_value()
-    
+
     def __gt__(self, other):
         return self.__cmp_value() >= other.__cmp_value()
-    
+
     def __str__(self):
         return f'{self.suit} {self.rank}'
 
@@ -156,13 +156,16 @@ class Shoe:
         self.discard_hidden = []
 
     def deal(self):
+        if self.cards_left() == 0:
+            return None
         card = self.cards.pop(0)
         self.discard_shown.append(card)
         return card
 
     def burn(self):
-        card = self.cards.pop(0)
-        self.discard_hidden.append(card)
+        if self.cards_left() > 0:
+            card = self.cards.pop(0)
+            self.discard_hidden.append(card)
 
     def shuffle(self):
         random.shuffle(self.cards)

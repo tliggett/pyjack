@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
   name = 'pyjack21',         # How you named your package folder (MyLib)
   packages = ['pyjack21'],   # Chose the same as "name"
-  version = '0.1.6',      # Start with a small number and increase it with every change you make
+  version = '0.1.8',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'blackjack simulator for machine learning and data analysis',   # Give a short description about your library
   author = 'TJ Liggett',                   # Type in your name

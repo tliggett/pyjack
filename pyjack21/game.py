@@ -125,14 +125,14 @@ class BlackJackTable:
 
     def deal(self):
         self.shoe.burn()
-        self.dealer.hand.append(self.shoe.deal())
+        self.dealer.deal(self.shoe.deal())
         for player in self.players:
             if player.wager != 0:
-                player.hand.append(self.shoe.deal())
-        self.dealer.hand.append(self.shoe.deal())
+                player.deal(self.shoe.deal())
+        self.dealer.deal(self.shoe.deal())
         for player in self.players:
             if player.wager != 0:
-                player.hand.append(self.shoe.deal())
+                player.deal(self.shoe.deal())
     
     def clear_table(self):
         self.dealer.hand = []
@@ -165,8 +165,8 @@ class BlackJackTable:
 
 
 if __name__ == "__main__":
-    table = BlackJackTable(hands=1000)
+    table = BlackJackTable(hands=100)
     table.run()
     print(table.df)
-    table.to_csv('output.csv')
+    # table.to_csv('output.csv')
 

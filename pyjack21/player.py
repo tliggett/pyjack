@@ -61,6 +61,9 @@ class Player:
             self.wager = minimum
         return minimum
 
+    def deal(self, card: Card):
+        self.hand.append(card)
+
     def play(self, shoe: Shoe, dealer_card: Card):
         """
         player plays current hand and decides move
@@ -114,12 +117,12 @@ class Player:
         hand_key = ""
         for card in hand_s:
             hand_key += card.char_rep()
-            if self.__hand_is_pair():
-                hand_key = f'{hand_key}'
-            elif 'A' in hand_key and self.__hand_is_soft():
-                hand_key = f'S{self.hand_value()}'
-            else:
-                hand_key=f'H{self.hand_value()}'
+        if self.__hand_is_pair():
+            hand_key = f'{hand_key}'
+        elif 'A' in hand_key and self.__hand_is_soft():
+            hand_key = f'S{self.hand_value()}'
+        else:
+            hand_key=f'H{self.hand_value()}'
         return hand_key
 
     def __hand_is_soft(self):
