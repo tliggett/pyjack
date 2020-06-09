@@ -4,22 +4,19 @@ from pyjack21.shoe import Shoe, Card, Rank, Suit
 from pyjack21.human import get_human
 
 
-class Player:
-    def __init__(self, payroll=500):
-        """
-        initializes a player for blackjack
-        :param payroll: blackjack player payroll
-        """
 
-        self.hand = [] # The player's hand of cards.
-        self.type = 'human' # player type. will allow for ai types later
-        self.payroll = payroll # player's remaining money 
-        self.wager = 0  # player's wager for current hand
-        self.moves = get_human()
-        '''
-        with open('pyjack21/data/human.json') as f:
-            self.moves = json.load(f)
-        '''
+class Hand:
+    def __init__(self, cards=[]):
+        """
+        class hand stores a hand of cards
+        """
+        self.hand = []
+        for card in cards:
+            self.deal(card)
+
+
+    def deal(self, card: Card):
+        self.hand.append(card)
 
     def hand_value(self, hand=None):
         """
@@ -28,7 +25,6 @@ class Player:
         """
         if hand is None:
             hand = self.hand
-
         hand = sorted(hand)
         value = 0
         # First calculate the soft value of a hand
@@ -47,49 +43,6 @@ class Player:
                 value += card.value(aces_high=False)
 
         return value
-
-    def bet(self, minimum=10):
-        """
-        returns the bet of the player
-        :param minimum: the minimum bet for the hand
-        :return: the bet of the player
-        """
-        if minimum > self.payroll:
-            self.wager = 0
-        else:
-            self.payroll = self.payroll - minimum
-            self.wager = minimum
-        return minimum
-
-    def deal(self, card: Card):
-        self.hand.append(card)
-
-    def play(self, shoe: Shoe, dealer_card: Card):
-        """
-        player plays current hand and decides move
-        :param shoe: the shoe of cards in player
-        :param dealer_card: the card of the dealer
-        """
-        move = ""
-        if self.hand_value() > 21:
-            move = "BUST"
-        elif self.hand_value() == 21:
-            if len(self.hand) == 2:
-                move = "BLACKJACK"
-            else:
-                move = "S"
-        else:
-             move = self.moves["hand"][self.hand_key()][dealer_card.char_rep()]
-        # print(f'{self.hand_value()} : {move}')
-        return move
-
-    def pay(self, payout):
-        """
-        pays the player and resets their wager
-        :param payout: amount to pay the player
-        """
-        self.payroll = self.payroll + payout
-        self.wager = 0
 
     def hand_str(self):
         """
@@ -169,6 +122,79 @@ class Player:
                 ace_count = ace_count + 1
         return ace_count
 
+
+class Player:
+    def __init__(self, payroll=500):
+        """
+        initializes a player for blackjack
+        :param payroll: blackjack player payroll
+        """
+
+        self.hands = [] # The player's hand of cards.
+        self.type = 'human' # player type. will allow for ai types later
+        self.payroll = payroll # player's remaining money 
+        self.wager = 0  # player's wager for current hand
+        self.moves = get_human()
+        '''
+        with open('pyjack21/data/human.json') as f:
+            self.moves = json.load(f)
+        '''
+
+    def dealer_card(self):
+        return self.hands[0].hand[0]
+
+    def bet(self, minimum=10):
+        """
+        returns the bet of the player
+        :param minimum: the minimum bet for the hand
+        :return: the bet of the player
+        """
+        if minimum > self.payroll:
+            self.wager = 0
+        else:
+            self.payroll = self.payroll - minimum
+            self.wager = minimum
+        return minimum
+
+    def deal_hand(self, hand: Hand):
+        self.hands.append(hand)
+    
+    def deal_hand_cards(self, cards=[]):
+        hand = Hand()
+        for card in cards:
+            hand.append(card)
+        self.hands.append(hand)
+
+    def move(self, shoe: Shoe, hand: Hand, dealer_card: Card):
+        """
+        player plays current hand and decides move
+        :param shoe: the shoe of cards in player
+        :param dealer_card: the card of the dealer
+        """
+        move = ""
+        if hand.hand_value() > 21:
+            move = "BUST"
+        elif hand.hand_value() == 21:
+            if len(hand.hand) == 2:
+                move = "BLACKJACK"
+            else:
+                move = "S"
+        else:
+             move = self.moves["hand"][hand.hand_key()][dealer_card.char_rep()]
+        # print(f'{self.hand_value()} : {move}')
+        return move
+
+    def pay(self, payout):
+        """
+        pays the player and resets their wager
+        :param payout: amount to pay the player
+        """
+        self.payroll = self.payroll + payout
+        self.wager = 0
+
+
+
+
 if __name__ == "__main__":
     izzy = Player()
     shoe = Shoe(6)
@@ -186,4 +212,4 @@ if __name__ == "__main__":
        print(f'{izzy.hand_str()}')
 
     print(f'Final Hand Value: {izzy.hand_value()}')
-    
+
