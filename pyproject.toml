@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "[pyjack21]"
+version = "0.3.0"
+description = ""
+authors = [
+    "TJ Liggett <tliggett@sonifi.com>"
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pandas = "*"
+jupyterlab = "*"
+matplotlib = "*"
+pytest = "*"
+
+[build-system]
+requires = ["poetry>=1.1"]
+build-backend = "poetry.masonry.api"
